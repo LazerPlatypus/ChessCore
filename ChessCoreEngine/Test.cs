@@ -1,173 +1,181 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using ChessCoreEngine;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace ChessEngine.Engine
 {
-	public class CorrectnessTest
-	{
-		public void RunAllCorrectnessTests()
-		{
-			TestBlankBoard();
-			TestStandardBoardShortFEN();
-			TestStandardBoardFullFEN();
-			TestNotation();
-			TestValidMoves();
-			TestSimpleMoves();
-			TestRealGame();
-			Test50MoveRule();
-			TestAI();
-		}
-		
-		[Test]
-		public void TestBlankBoard()
-		{
-			var board = new Board();
-			var fen = Board.Fen(false, board);
-			Assert.AreEqual("8/8/8/8/8/8/8/8 w - - 0 0", fen);
-		}
+    [TestFixture]
+    public class CorrectnessTest
+    {
+        public void RunAllCorrectnessTests()
+        {
+            TestBlankBoard();
+            TestStandardBoardShortFEN();
+            TestStandardBoardFullFEN();
+            TestNotation();
+            TestValidMoves();
+            TestSimpleMoves();
+            TestRealGame();
+            Test50MoveRule();
+            TestAI();
+        }
 
-		[Test]
-		public void TestStandardBoardShortFEN()
-		{
-			var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -";
-			var board = new Board(standardFen);
-			var fen = Board.Fen(true, board);
-			Assert.AreEqual(standardFen, fen);
-		}
+        [Test]
+        public void TestBlankBoard()
+        {
+            var board = new Board();
+            var fen = Board.Fen(false, board);
+            Assert.AreEqual("8/8/8/8/8/8/8/8 w - - 0 0", fen);
+        }
 
-		[Test]
-		public void TestStandardBoardFullFEN()
-		{
-			var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-			var board = new Board(standardFen);
-			var fen = Board.Fen(false, board);
-			Assert.AreEqual(standardFen, fen);
-		}
-		
-		[Test]
-		public void TestBoardOrientation()
-		{
-			var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-			var board = new Board(standardFen);
+        [Test]
+        public void TestStandardBoardShortFEN()
+        {
+            var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -";
+            var board = new Board(standardFen);
+            var fen = Board.Fen(true, board);
+            Assert.AreEqual(standardFen, fen);
+        }
 
-			// 0,0 is a8
-			// 7,7 is h1
+        [Test]
+        public void TestStandardBoardFullFEN()
+        {
+            var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+            var board = new Board(standardFen);
+            var fen = Board.Fen(false, board);
+            Assert.AreEqual(standardFen, fen);
+        }
 
-			// is the board oriented the way we expect?
-			var piece = board.Squares[0].Piece;
-			Assert.AreEqual(ChessPieceColor.Black, piece.PieceColor);
-			Assert.AreEqual(ChessPieceType.Rook, piece.PieceType);
+        [Test]
+        public void TestBoardOrientation()
+        {
+            var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+            var board = new Board(standardFen);
 
-			piece = board.Squares[3].Piece;
-			Assert.AreEqual(ChessPieceColor.Black, piece.PieceColor);
-			Assert.AreEqual(ChessPieceType.Queen, piece.PieceType);
+            // 0,0 is a8
+            // 7,7 is h1
 
-			piece = board.Squares[63].Piece;
-			Assert.AreEqual(ChessPieceColor.White, piece.PieceColor);
-			Assert.AreEqual(ChessPieceType.Rook, piece.PieceType);
+            // is the board oriented the way we expect?
+            var piece = board.Squares[0].Piece;
+            Assert.AreEqual(ChessPieceColor.Black, piece.PieceColor);
+            Assert.AreEqual(ChessPieceType.Rook, piece.PieceType);
 
-			piece = board.Squares[59].Piece;
-			Assert.AreEqual(ChessPieceColor.White, piece.PieceColor);
-			Assert.AreEqual(ChessPieceType.Queen, piece.PieceType);
-		}
-		
-		[Test]
-		public void TestNotation()
-		{
-			byte sourceColumn=0, sourceRow=0, destinationColumn=0, destinationRow=0;
+            piece = board.Squares[3].Piece;
+            Assert.AreEqual(ChessPieceColor.Black, piece.PieceColor);
+            Assert.AreEqual(ChessPieceType.Queen, piece.PieceType);
 
-			Assert.IsFalse(MoveContent.ParseAN("toolong", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
-			Assert.IsFalse(MoveContent.ParseAN("abc", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
+            piece = board.Squares[63].Piece;
+            Assert.AreEqual(ChessPieceColor.White, piece.PieceColor);
+            Assert.AreEqual(ChessPieceType.Rook, piece.PieceType);
 
-			Assert.IsTrue(MoveContent.ParseAN("a8h1", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
-			Assert.AreEqual(sourceColumn, 0);
-			Assert.AreEqual(sourceRow, 0);
-			Assert.AreEqual(destinationColumn, 7);
-			Assert.AreEqual(destinationRow, 7);
+            piece = board.Squares[59].Piece;
+            Assert.AreEqual(ChessPieceColor.White, piece.PieceColor);
+            Assert.AreEqual(ChessPieceType.Queen, piece.PieceType);
+        }
 
-			Assert.IsTrue(MoveContent.ParseAN("b3e4", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
-			Assert.AreEqual(sourceColumn, 1);
-			Assert.AreEqual(sourceRow, 5);
-			Assert.AreEqual(destinationColumn, 4);
-			Assert.AreEqual(destinationRow, 4);
-		}
+        [Test]
+        public void TestNotation()
+        {
+            byte sourceColumn = 0, sourceRow = 0, destinationColumn = 0, destinationRow = 0;
 
-		[Test]
-		public void TestValidMoves()
-		{
-			var engine = new Engine("rnbqkbnr/ppppppp1/8/8/8/8/8/8 w KQkq - 0 1");
-			
-			// rook
-			Assert.IsFalse(engine.IsValidMove(0,0,7,7));
-			Assert.IsFalse(engine.IsValidMove(0,0,0,1));
-			Assert.IsFalse(engine.IsValidMoveAN("a8g1"));
-			Assert.IsFalse(engine.IsValidMoveAN("a8a7"));
-			
-			// pawn
-			Assert.IsTrue(engine.IsValidMove(0,1,0,2));
-			Assert.IsTrue(engine.IsValidMove(0,1,0,3));
-			Assert.IsFalse(engine.IsValidMove(0,1,0,4));
-			Assert.IsTrue(engine.IsValidMoveAN("a7a6"));
-			Assert.IsTrue(engine.IsValidMoveAN("a7a5"));
-			Assert.IsFalse(engine.IsValidMoveAN("a7a4"));
-			
-			// knight
-			Assert.IsTrue(engine.IsValidMove(1,0,0,2));
-			Assert.IsTrue(engine.IsValidMove(1,0,2,2));
-			Assert.IsFalse(engine.IsValidMove(1,0,3,1));
-			Assert.IsTrue(engine.IsValidMoveAN("b8a6"));
-			Assert.IsTrue(engine.IsValidMoveAN("b8c6"));
-			Assert.IsFalse(engine.IsValidMoveAN("b8d7"));
+            Assert.IsFalse(MoveContent.ParseAN("toolong", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
+            Assert.IsFalse(MoveContent.ParseAN("abc", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
 
-			// rook2
-			Assert.IsTrue(engine.IsValidMove(7,0,7,1));
-			Assert.IsTrue(engine.IsValidMove(7,0,7,7));
-			Assert.IsFalse(engine.IsValidMove(7,0,6,7));
-			Assert.IsTrue(engine.IsValidMoveAN("h8h7"));
-			Assert.IsTrue(engine.IsValidMoveAN("h8h1"));
-			Assert.IsFalse(engine.IsValidMoveAN("h8g1"));
-		}
-		
-		[Test]
-		public void TestSimpleMoves()
-		{
-			var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-			var engine = new Engine(standardFen);
-			
-			engine.MovePieceAN("e2e4");
-			Assert.AreEqual("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", engine.FEN);
+            Assert.IsTrue(MoveContent.ParseAN("a8h1", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
+            Assert.AreEqual(sourceColumn, 0);
+            Assert.AreEqual(sourceRow, 0);
+            Assert.AreEqual(destinationColumn, 7);
+            Assert.AreEqual(destinationRow, 7);
 
-			engine.MovePieceAN("c7c5");
-			Assert.AreEqual("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2", engine.FEN);
+            Assert.IsTrue(MoveContent.ParseAN("b3e4", ref sourceColumn, ref sourceRow, ref destinationColumn, ref destinationRow));
+            Assert.AreEqual(sourceColumn, 1);
+            Assert.AreEqual(sourceRow, 5);
+            Assert.AreEqual(destinationColumn, 4);
+            Assert.AreEqual(destinationRow, 4);
+        }
 
-			engine.MovePieceAN("g1f3");
-			Assert.AreEqual("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2", engine.FEN);
-		}
+        [Test]
+        public void TestValidMoves()
+        {
+            var engine = new Engine("rnbqkbnr/ppppppp1/8/8/8/8/8/8 w KQkq - 0 1");
 
-		[Test]
-		public void Test50MoveRule() {
-			var engine = new Engine("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-			for (var i=0; i<24; i++) {
-				engine.MovePieceAN("b1c3");
-				engine.MovePieceAN("b8c6");
-				engine.MovePieceAN("c3b1");
-				engine.MovePieceAN("c6b8");
-				Assert.IsFalse(engine.FiftyMove);
-			}
-			engine.MovePieceAN("b1c3");
-			Assert.IsFalse(engine.FiftyMove);
-			engine.MovePieceAN("b8c6");
-			Assert.IsFalse(engine.FiftyMove);
-			engine.MovePieceAN("c3b1");
-			Assert.IsFalse(engine.FiftyMove);
-			engine.MovePieceAN("c6b8");
-			Assert.IsTrue(engine.FiftyMove);
-		}
-		
-		[Test]
-		public void TestRealGame() {
-			/*
+            // rook
+            Assert.IsFalse(engine.IsValidMove(0, 0, 7, 7));
+            Assert.IsFalse(engine.IsValidMove(0, 0, 0, 1));
+            Assert.IsFalse(engine.IsValidMoveAN("a8g1"));
+            Assert.IsFalse(engine.IsValidMoveAN("a8a7"));
+
+            // pawn
+            Assert.IsTrue(engine.IsValidMove(0, 1, 0, 2));
+            Assert.IsTrue(engine.IsValidMove(0, 1, 0, 3));
+            Assert.IsFalse(engine.IsValidMove(0, 1, 0, 4));
+            Assert.IsTrue(engine.IsValidMoveAN("a7a6"));
+            Assert.IsTrue(engine.IsValidMoveAN("a7a5"));
+            Assert.IsFalse(engine.IsValidMoveAN("a7a4"));
+
+            // knight
+            Assert.IsTrue(engine.IsValidMove(1, 0, 0, 2));
+            Assert.IsTrue(engine.IsValidMove(1, 0, 2, 2));
+            Assert.IsFalse(engine.IsValidMove(1, 0, 3, 1));
+            Assert.IsTrue(engine.IsValidMoveAN("b8a6"));
+            Assert.IsTrue(engine.IsValidMoveAN("b8c6"));
+            Assert.IsFalse(engine.IsValidMoveAN("b8d7"));
+
+            // rook2
+            Assert.IsTrue(engine.IsValidMove(7, 0, 7, 1));
+            Assert.IsTrue(engine.IsValidMove(7, 0, 7, 7));
+            Assert.IsFalse(engine.IsValidMove(7, 0, 6, 7));
+            Assert.IsTrue(engine.IsValidMoveAN("h8h7"));
+            Assert.IsTrue(engine.IsValidMoveAN("h8h1"));
+            Assert.IsFalse(engine.IsValidMoveAN("h8g1"));
+        }
+
+        [Test]
+        public void TestSimpleMoves()
+        {
+            var standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+            var engine = new Engine(standardFen);
+
+            engine.MovePieceAN("e2e4");
+            Assert.AreEqual("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", engine.FEN);
+
+            engine.MovePieceAN("c7c5");
+            Assert.AreEqual("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2", engine.FEN);
+
+            engine.MovePieceAN("g1f3");
+            Assert.AreEqual("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2", engine.FEN);
+        }
+
+        [Test]
+        public void Test50MoveRule()
+        {
+            var engine = new Engine("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            for (var i = 0; i < 24; i++)
+            {
+                engine.MovePieceAN("b1c3");
+                engine.MovePieceAN("b8c6");
+                engine.MovePieceAN("c3b1");
+                engine.MovePieceAN("c6b8");
+                Assert.IsFalse(engine.FiftyMove);
+            }
+            engine.MovePieceAN("b1c3");
+            Assert.IsFalse(engine.FiftyMove);
+            engine.MovePieceAN("b8c6");
+            Assert.IsFalse(engine.FiftyMove);
+            engine.MovePieceAN("c3b1");
+            Assert.IsFalse(engine.FiftyMove);
+            engine.MovePieceAN("c6b8");
+            Assert.IsTrue(engine.FiftyMove);
+        }
+
+        [Test]
+        public void TestRealGame()
+        {
+            /*
 			// http://www.chessgames.com/perl/nph-chesspgn?text=1&gid=1067317
 			string[] pgn = {
 	"[Event \"Third Rosenwald Trophy\"]",
@@ -216,197 +224,381 @@ namespace ChessEngine.Engine
 		};
 			*/
 
-			var engine = new Engine("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-			string[] movelist = {
-				"g1f3",
-				"g8f6",
-				"c2c4",
-				"g7g6",
-				"b1c3",
-				"f8g7",
-				"d2d4",
-				"e8g8",
-				"c1f4",
-				"d7d5",
-				"d1b3",
-				"d5c4",
-				"b3c4",
-				"c7c6",
-				"e2e4",
-				"b8d7",
-				"a1d1",
-				"d7b6",
-				"c4c5",
-				"c8g4",
-				"f4g5",
-				"b6a4",
-				"c5a3",
-				"a4c3",
-				"b2c3",
-				"f6e4",
-				"g5e7",
-				"d8b6",
-				"f1c4",
-				"e4c3",
-				"e7c5",
-				"f8e8",
-				"e1f1",
-				"g4e6",
-				"c5b6",
-				"e6c4",
-				"f1g1",
-				"c3e2",
-				"g1f1",
-				"e2d4",
-				"f1g1",
-				"d4e2",
-				"g1f1",
-				"e2c3",
-				"f1g1",
-				"a7b6",
-				"a3b4",
-				"a8a4",
-				"b4b6",
-				"c3d1",
-				"h2h3",
-				"a4a2",
-				"g1h2",
-				"d1f2",
-				"h1e1",
-				"e8e1",
-				"b6d8",
-				"g7f8",
-				"f3e1",
-				"c4d5",
-				"e1f3",
-				"f2e4",
-				"d8b8",
-				"b7b5",
-				"h3h4",
-				"h7h5",
-				"f3e5",
-				"g8g7",
-				"h2g1",
-				"f8c5",
-				"g1f1",
-				"e4g3",
-				"f1e1",
-				"c5b4",
-				"e1d1",
-				"d5b3",
-				"d1c1",
-				"g3e2",
-				"c1b1",
-				"e2c3",
-				"b1c1",
-				"a2c2"
-			};
-			string[] fenlist = {
-				"rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
-				"rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2",
-				"rnbqkb1r/pppppppp/5n2/8/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq c3 0 2",
-				"rnbqkb1r/pppppp1p/5np1/8/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 0 3",
-				"rnbqkb1r/pppppp1p/5np1/8/2P5/2N2N2/PP1PPPPP/R1BQKB1R b KQkq - 1 3",
-				"rnbqk2r/ppppppbp/5np1/8/2P5/2N2N2/PP1PPPPP/R1BQKB1R w KQkq - 2 4",
-				"rnbqk2r/ppppppbp/5np1/8/2PP4/2N2N2/PP2PPPP/R1BQKB1R b KQkq d3 0 4",
-				"rnbq1rk1/ppppppbp/5np1/8/2PP4/2N2N2/PP2PPPP/R1BQKB1R w KQ - 1 5",
-				"rnbq1rk1/ppppppbp/5np1/8/2PP1B2/2N2N2/PP2PPPP/R2QKB1R b KQ - 2 5",
-				"rnbq1rk1/ppp1ppbp/5np1/3p4/2PP1B2/2N2N2/PP2PPPP/R2QKB1R w KQ d6 0 6",
-				"rnbq1rk1/ppp1ppbp/5np1/3p4/2PP1B2/1QN2N2/PP2PPPP/R3KB1R b KQ - 1 6",
-				"rnbq1rk1/ppp1ppbp/5np1/8/2pP1B2/1QN2N2/PP2PPPP/R3KB1R w KQ - 0 7",
-				"rnbq1rk1/ppp1ppbp/5np1/8/2QP1B2/2N2N2/PP2PPPP/R3KB1R b KQ - 0 7",
-				"rnbq1rk1/pp2ppbp/2p2np1/8/2QP1B2/2N2N2/PP2PPPP/R3KB1R w KQ - 0 8",
-				"rnbq1rk1/pp2ppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/R3KB1R b KQ e3 0 8",
-				"r1bq1rk1/pp1nppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/R3KB1R w KQ - 1 9",
-				"r1bq1rk1/pp1nppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/3RKB1R b K - 2 9",
-				"r1bq1rk1/pp2ppbp/1np2np1/8/2QPPB2/2N2N2/PP3PPP/3RKB1R w K - 3 10",
-				"r1bq1rk1/pp2ppbp/1np2np1/2Q5/3PPB2/2N2N2/PP3PPP/3RKB1R b K - 4 10",
-				"r2q1rk1/pp2ppbp/1np2np1/2Q5/3PPBb1/2N2N2/PP3PPP/3RKB1R w K - 5 11",
-				"r2q1rk1/pp2ppbp/1np2np1/2Q3B1/3PP1b1/2N2N2/PP3PPP/3RKB1R b K - 6 11",
-				"r2q1rk1/pp2ppbp/2p2np1/2Q3B1/n2PP1b1/2N2N2/PP3PPP/3RKB1R w K - 7 12",
-				"r2q1rk1/pp2ppbp/2p2np1/6B1/n2PP1b1/Q1N2N2/PP3PPP/3RKB1R b K - 8 12",
-				"r2q1rk1/pp2ppbp/2p2np1/6B1/3PP1b1/Q1n2N2/PP3PPP/3RKB1R w K - 0 13",
-				"r2q1rk1/pp2ppbp/2p2np1/6B1/3PP1b1/Q1P2N2/P4PPP/3RKB1R b K - 0 13",
-				"r2q1rk1/pp2ppbp/2p3p1/6B1/3Pn1b1/Q1P2N2/P4PPP/3RKB1R w K - 0 14",
-				"r2q1rk1/pp2Bpbp/2p3p1/8/3Pn1b1/Q1P2N2/P4PPP/3RKB1R b K - 0 14",
-				"r4rk1/pp2Bpbp/1qp3p1/8/3Pn1b1/Q1P2N2/P4PPP/3RKB1R w K - 1 15",
-				"r4rk1/pp2Bpbp/1qp3p1/8/2BPn1b1/Q1P2N2/P4PPP/3RK2R b K - 2 15",
-				"r4rk1/pp2Bpbp/1qp3p1/8/2BP2b1/Q1n2N2/P4PPP/3RK2R w K - 0 16",
-				"r4rk1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3RK2R b K - 1 16",
-				"r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3RK2R w K - 2 17",
-				"r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17",
-				"r3r1k1/pp3pbp/1qp1b1p1/2B5/2BP4/Q1n2N2/P4PPP/3R1K1R w - - 4 18",
-				"r3r1k1/pp3pbp/1Bp1b1p1/8/2BP4/Q1n2N2/P4PPP/3R1K1R b - - 0 18",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q1n2N2/P4PPP/3R1K1R w - - 0 19",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q1n2N2/P4PPP/3R2KR b - - 1 19",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R2KR w - - 2 20",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R1K1R b - - 3 20",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bn4/Q4N2/P4PPP/3R1K1R w - - 0 21",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2bn4/Q4N2/P4PPP/3R2KR b - - 1 21",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q4N2/P3nPPP/3R2KR w - - 2 22",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q4N2/P3nPPP/3R1K1R b - - 3 22",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q1n2N2/P4PPP/3R1K1R w - - 4 23",
-				"r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q1n2N2/P4PPP/3R2KR b - - 5 23",
-				"r3r1k1/1p3pbp/1pp3p1/8/2b5/Q1n2N2/P4PPP/3R2KR w - - 0 24",
-				"r3r1k1/1p3pbp/1pp3p1/8/1Qb5/2n2N2/P4PPP/3R2KR b - - 1 24",
-				"4r1k1/1p3pbp/1pp3p1/8/rQb5/2n2N2/P4PPP/3R2KR w - - 2 25",
-				"4r1k1/1p3pbp/1Qp3p1/8/r1b5/2n2N2/P4PPP/3R2KR b - - 0 25",
-				"4r1k1/1p3pbp/1Qp3p1/8/r1b5/5N2/P4PPP/3n2KR w - - 0 26",
-				"4r1k1/1p3pbp/1Qp3p1/8/r1b5/5N1P/P4PP1/3n2KR b - - 0 26",
-				"4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4PP1/3n2KR w - - 0 27",
-				"4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4PPK/3n3R b - - 1 27",
-				"4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/7R w - - 0 28",
-				"4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/4R3 b - - 1 28",
-				"6k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/4r3 w - - 0 29",
-				"3Q2k1/1p3pbp/2p3p1/8/2b5/5N1P/r4nPK/4r3 b - - 1 29",
-				"3Q1bk1/1p3p1p/2p3p1/8/2b5/5N1P/r4nPK/4r3 w - - 2 30",
-				"3Q1bk1/1p3p1p/2p3p1/8/2b5/7P/r4nPK/4N3 b - - 0 30",
-				"3Q1bk1/1p3p1p/2p3p1/3b4/8/7P/r4nPK/4N3 w - - 1 31",
-				"3Q1bk1/1p3p1p/2p3p1/3b4/8/5N1P/r4nPK/8 b - - 2 31",
-				"3Q1bk1/1p3p1p/2p3p1/3b4/4n3/5N1P/r5PK/8 w - - 3 32",
-				"1Q3bk1/1p3p1p/2p3p1/3b4/4n3/5N1P/r5PK/8 b - - 4 32",
-				"1Q3bk1/5p1p/2p3p1/1p1b4/4n3/5N1P/r5PK/8 w - b6 0 33",
-				"1Q3bk1/5p1p/2p3p1/1p1b4/4n2P/5N2/r5PK/8 b - - 0 33",
-				"1Q3bk1/5p2/2p3p1/1p1b3p/4n2P/5N2/r5PK/8 w - h6 0 34",
-				"1Q3bk1/5p2/2p3p1/1p1bN2p/4n2P/8/r5PK/8 b - - 1 34",
-				"1Q3b2/5pk1/2p3p1/1p1bN2p/4n2P/8/r5PK/8 w - - 2 35",
-				"1Q3b2/5pk1/2p3p1/1p1bN2p/4n2P/8/r5P1/6K1 b - - 3 35",
-				"1Q6/5pk1/2p3p1/1pbbN2p/4n2P/8/r5P1/6K1 w - - 4 36",
-				"1Q6/5pk1/2p3p1/1pbbN2p/4n2P/8/r5P1/5K2 b - - 5 36",
-				"1Q6/5pk1/2p3p1/1pbbN2p/7P/6n1/r5P1/5K2 w - - 6 37",
-				"1Q6/5pk1/2p3p1/1pbbN2p/7P/6n1/r5P1/4K3 b - - 7 37",
-				"1Q6/5pk1/2p3p1/1p1bN2p/1b5P/6n1/r5P1/4K3 w - - 8 38",
-				"1Q6/5pk1/2p3p1/1p1bN2p/1b5P/6n1/r5P1/3K4 b - - 9 38",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b4n1/r5P1/3K4 w - - 10 39",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b4n1/r5P1/2K5 b - - 11 39",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b6/r3n1P1/2K5 w - - 12 40",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b6/r3n1P1/1K6 b - - 13 40",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/r5P1/1K6 w - - 14 41",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/r5P1/2K5 b - - 15 41",
-				"1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/2r3P1/2K5 w - - 16 42"
-			};
-			var index=0;
-			foreach (var move in movelist) {
-				engine.MovePieceAN(move);
-				Assert.AreEqual(fenlist[index], engine.FEN);
-				index++;
-			}
-		}
-		
-		[Test]
-		public void TestAI()
-		{
-			// set up a simple scenario with an obvious checkmate in 1 move
-			var engine = new Engine("k7/7R/6R1/8/8/8/8/K7 w - - 0 1");
-			engine.GameDifficulty = Engine.Difficulty.Easy;
-			engine.AiPonderMove();
-			MoveContent lastMove = engine.GetMoveHistory().ToArray()[0];
-			string move = lastMove.GetPureCoordinateNotation();
-			// did the AI find the checkmate?
-			Assert.AreEqual("g6g8", move);
-		}
-	}
-	
+            var engine = new Engine("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+            string[] movelist = {
+                "g1f3",
+                "g8f6",
+                "c2c4",
+                "g7g6",
+                "b1c3",
+                "f8g7",
+                "d2d4",
+                "e8g8",
+                "c1f4",
+                "d7d5",
+                "d1b3",
+                "d5c4",
+                "b3c4",
+                "c7c6",
+                "e2e4",
+                "b8d7",
+                "a1d1",
+                "d7b6",
+                "c4c5",
+                "c8g4",
+                "f4g5",
+                "b6a4",
+                "c5a3",
+                "a4c3",
+                "b2c3",
+                "f6e4",
+                "g5e7",
+                "d8b6",
+                "f1c4",
+                "e4c3",
+                "e7c5",
+                "f8e8",
+                "e1f1",
+                "g4e6",
+                "c5b6",
+                "e6c4",
+                "f1g1",
+                "c3e2",
+                "g1f1",
+                "e2d4",
+                "f1g1",
+                "d4e2",
+                "g1f1",
+                "e2c3",
+                "f1g1",
+                "a7b6",
+                "a3b4",
+                "a8a4",
+                "b4b6",
+                "c3d1",
+                "h2h3",
+                "a4a2",
+                "g1h2",
+                "d1f2",
+                "h1e1",
+                "e8e1",
+                "b6d8",
+                "g7f8",
+                "f3e1",
+                "c4d5",
+                "e1f3",
+                "f2e4",
+                "d8b8",
+                "b7b5",
+                "h3h4",
+                "h7h5",
+                "f3e5",
+                "g8g7",
+                "h2g1",
+                "f8c5",
+                "g1f1",
+                "e4g3",
+                "f1e1",
+                "c5b4",
+                "e1d1",
+                "d5b3",
+                "d1c1",
+                "g3e2",
+                "c1b1",
+                "e2c3",
+                "b1c1",
+                "a2c2"
+            };
+            string[] fenlist = {
+                "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1",
+                "rnbqkb1r/pppppppp/5n2/8/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 2 2",
+                "rnbqkb1r/pppppppp/5n2/8/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq c3 0 2",
+                "rnbqkb1r/pppppp1p/5np1/8/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 0 3",
+                "rnbqkb1r/pppppp1p/5np1/8/2P5/2N2N2/PP1PPPPP/R1BQKB1R b KQkq - 1 3",
+                "rnbqk2r/ppppppbp/5np1/8/2P5/2N2N2/PP1PPPPP/R1BQKB1R w KQkq - 2 4",
+                "rnbqk2r/ppppppbp/5np1/8/2PP4/2N2N2/PP2PPPP/R1BQKB1R b KQkq d3 0 4",
+                "rnbq1rk1/ppppppbp/5np1/8/2PP4/2N2N2/PP2PPPP/R1BQKB1R w KQ - 1 5",
+                "rnbq1rk1/ppppppbp/5np1/8/2PP1B2/2N2N2/PP2PPPP/R2QKB1R b KQ - 2 5",
+                "rnbq1rk1/ppp1ppbp/5np1/3p4/2PP1B2/2N2N2/PP2PPPP/R2QKB1R w KQ d6 0 6",
+                "rnbq1rk1/ppp1ppbp/5np1/3p4/2PP1B2/1QN2N2/PP2PPPP/R3KB1R b KQ - 1 6",
+                "rnbq1rk1/ppp1ppbp/5np1/8/2pP1B2/1QN2N2/PP2PPPP/R3KB1R w KQ - 0 7",
+                "rnbq1rk1/ppp1ppbp/5np1/8/2QP1B2/2N2N2/PP2PPPP/R3KB1R b KQ - 0 7",
+                "rnbq1rk1/pp2ppbp/2p2np1/8/2QP1B2/2N2N2/PP2PPPP/R3KB1R w KQ - 0 8",
+                "rnbq1rk1/pp2ppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/R3KB1R b KQ e3 0 8",
+                "r1bq1rk1/pp1nppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/R3KB1R w KQ - 1 9",
+                "r1bq1rk1/pp1nppbp/2p2np1/8/2QPPB2/2N2N2/PP3PPP/3RKB1R b K - 2 9",
+                "r1bq1rk1/pp2ppbp/1np2np1/8/2QPPB2/2N2N2/PP3PPP/3RKB1R w K - 3 10",
+                "r1bq1rk1/pp2ppbp/1np2np1/2Q5/3PPB2/2N2N2/PP3PPP/3RKB1R b K - 4 10",
+                "r2q1rk1/pp2ppbp/1np2np1/2Q5/3PPBb1/2N2N2/PP3PPP/3RKB1R w K - 5 11",
+                "r2q1rk1/pp2ppbp/1np2np1/2Q3B1/3PP1b1/2N2N2/PP3PPP/3RKB1R b K - 6 11",
+                "r2q1rk1/pp2ppbp/2p2np1/2Q3B1/n2PP1b1/2N2N2/PP3PPP/3RKB1R w K - 7 12",
+                "r2q1rk1/pp2ppbp/2p2np1/6B1/n2PP1b1/Q1N2N2/PP3PPP/3RKB1R b K - 8 12",
+                "r2q1rk1/pp2ppbp/2p2np1/6B1/3PP1b1/Q1n2N2/PP3PPP/3RKB1R w K - 0 13",
+                "r2q1rk1/pp2ppbp/2p2np1/6B1/3PP1b1/Q1P2N2/P4PPP/3RKB1R b K - 0 13",
+                "r2q1rk1/pp2ppbp/2p3p1/6B1/3Pn1b1/Q1P2N2/P4PPP/3RKB1R w K - 0 14",
+                "r2q1rk1/pp2Bpbp/2p3p1/8/3Pn1b1/Q1P2N2/P4PPP/3RKB1R b K - 0 14",
+                "r4rk1/pp2Bpbp/1qp3p1/8/3Pn1b1/Q1P2N2/P4PPP/3RKB1R w K - 1 15",
+                "r4rk1/pp2Bpbp/1qp3p1/8/2BPn1b1/Q1P2N2/P4PPP/3RK2R b K - 2 15",
+                "r4rk1/pp2Bpbp/1qp3p1/8/2BP2b1/Q1n2N2/P4PPP/3RK2R w K - 0 16",
+                "r4rk1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3RK2R b K - 1 16",
+                "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3RK2R w K - 2 17",
+                "r3r1k1/pp3pbp/1qp3p1/2B5/2BP2b1/Q1n2N2/P4PPP/3R1K1R b - - 3 17",
+                "r3r1k1/pp3pbp/1qp1b1p1/2B5/2BP4/Q1n2N2/P4PPP/3R1K1R w - - 4 18",
+                "r3r1k1/pp3pbp/1Bp1b1p1/8/2BP4/Q1n2N2/P4PPP/3R1K1R b - - 0 18",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q1n2N2/P4PPP/3R1K1R w - - 0 19",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q1n2N2/P4PPP/3R2KR b - - 1 19",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R2KR w - - 2 20",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bP4/Q4N2/P3nPPP/3R1K1R b - - 3 20",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bn4/Q4N2/P4PPP/3R1K1R w - - 0 21",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2bn4/Q4N2/P4PPP/3R2KR b - - 1 21",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q4N2/P3nPPP/3R2KR w - - 2 22",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q4N2/P3nPPP/3R1K1R b - - 3 22",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q1n2N2/P4PPP/3R1K1R w - - 4 23",
+                "r3r1k1/pp3pbp/1Bp3p1/8/2b5/Q1n2N2/P4PPP/3R2KR b - - 5 23",
+                "r3r1k1/1p3pbp/1pp3p1/8/2b5/Q1n2N2/P4PPP/3R2KR w - - 0 24",
+                "r3r1k1/1p3pbp/1pp3p1/8/1Qb5/2n2N2/P4PPP/3R2KR b - - 1 24",
+                "4r1k1/1p3pbp/1pp3p1/8/rQb5/2n2N2/P4PPP/3R2KR w - - 2 25",
+                "4r1k1/1p3pbp/1Qp3p1/8/r1b5/2n2N2/P4PPP/3R2KR b - - 0 25",
+                "4r1k1/1p3pbp/1Qp3p1/8/r1b5/5N2/P4PPP/3n2KR w - - 0 26",
+                "4r1k1/1p3pbp/1Qp3p1/8/r1b5/5N1P/P4PP1/3n2KR b - - 0 26",
+                "4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4PP1/3n2KR w - - 0 27",
+                "4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4PPK/3n3R b - - 1 27",
+                "4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/7R w - - 0 28",
+                "4r1k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/4R3 b - - 1 28",
+                "6k1/1p3pbp/1Qp3p1/8/2b5/5N1P/r4nPK/4r3 w - - 0 29",
+                "3Q2k1/1p3pbp/2p3p1/8/2b5/5N1P/r4nPK/4r3 b - - 1 29",
+                "3Q1bk1/1p3p1p/2p3p1/8/2b5/5N1P/r4nPK/4r3 w - - 2 30",
+                "3Q1bk1/1p3p1p/2p3p1/8/2b5/7P/r4nPK/4N3 b - - 0 30",
+                "3Q1bk1/1p3p1p/2p3p1/3b4/8/7P/r4nPK/4N3 w - - 1 31",
+                "3Q1bk1/1p3p1p/2p3p1/3b4/8/5N1P/r4nPK/8 b - - 2 31",
+                "3Q1bk1/1p3p1p/2p3p1/3b4/4n3/5N1P/r5PK/8 w - - 3 32",
+                "1Q3bk1/1p3p1p/2p3p1/3b4/4n3/5N1P/r5PK/8 b - - 4 32",
+                "1Q3bk1/5p1p/2p3p1/1p1b4/4n3/5N1P/r5PK/8 w - b6 0 33",
+                "1Q3bk1/5p1p/2p3p1/1p1b4/4n2P/5N2/r5PK/8 b - - 0 33",
+                "1Q3bk1/5p2/2p3p1/1p1b3p/4n2P/5N2/r5PK/8 w - h6 0 34",
+                "1Q3bk1/5p2/2p3p1/1p1bN2p/4n2P/8/r5PK/8 b - - 1 34",
+                "1Q3b2/5pk1/2p3p1/1p1bN2p/4n2P/8/r5PK/8 w - - 2 35",
+                "1Q3b2/5pk1/2p3p1/1p1bN2p/4n2P/8/r5P1/6K1 b - - 3 35",
+                "1Q6/5pk1/2p3p1/1pbbN2p/4n2P/8/r5P1/6K1 w - - 4 36",
+                "1Q6/5pk1/2p3p1/1pbbN2p/4n2P/8/r5P1/5K2 b - - 5 36",
+                "1Q6/5pk1/2p3p1/1pbbN2p/7P/6n1/r5P1/5K2 w - - 6 37",
+                "1Q6/5pk1/2p3p1/1pbbN2p/7P/6n1/r5P1/4K3 b - - 7 37",
+                "1Q6/5pk1/2p3p1/1p1bN2p/1b5P/6n1/r5P1/4K3 w - - 8 38",
+                "1Q6/5pk1/2p3p1/1p1bN2p/1b5P/6n1/r5P1/3K4 b - - 9 38",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b4n1/r5P1/3K4 w - - 10 39",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b4n1/r5P1/2K5 b - - 11 39",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b6/r3n1P1/2K5 w - - 12 40",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1b6/r3n1P1/1K6 b - - 13 40",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/r5P1/1K6 w - - 14 41",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/r5P1/2K5 b - - 15 41",
+                "1Q6/5pk1/2p3p1/1p2N2p/1b5P/1bn5/2r3P1/2K5 w - - 16 42"
+            };
+            var index = 0;
+            foreach (var move in movelist)
+            {
+                engine.MovePieceAN(move);
+                Assert.AreEqual(fenlist[index], engine.FEN);
+                index++;
+            }
+        }
+
+        [Test]
+        public void TestAI()
+        {
+            // set up a simple scenario with an obvious checkmate in 1 move
+            var engine = new Engine("k7/7R/6R1/8/8/8/8/K7 w - - 0 1");
+            engine.GameDifficulty = Engine.Difficulty.Easy;
+            engine.AiPonderMove();
+            MoveContent lastMove = engine.GetMoveHistory().ToArray()[0];
+            string move = lastMove.GetPureCoordinateNotation();
+            // did the AI find the checkmate?
+            Assert.AreEqual("g6g8", move);
+        }
+
+        [Test]
+        public void TestChess960Placement()
+        {
+            // Chess960 placement rules are as follows:
+            // bishops must be on alternating colors (one white, one black)
+            // King must be between 2 rooks
+            // there must be 2 bishops (per side)
+            // there must be 2 rooks (per side)
+            // there must be 2 knights (per side)
+            // there must be 1 queen (per side)
+            // there must be 1 king (per side)
+            // there must be 8 pawns (per side)
+            // there must be 16 empty spaces (per side)
+            // King, Queen, Bishops, Knights, and Rooks must be in the first rank
+            // Pawns must be in the second rank.
+            // black should be a mirror-image of white (or vice-versa)
+
+            var chess960Fen = VarientBoardGenerator.Chess960() + " w KQkq - 0 1";
+            var board = new Board(chess960Fen);
+
+            // first, make sure we have the right number of pieces
+            int numOfEmpty = 0;
+            int numOfPawns = 0;
+            int numOfBishops = 0;
+            int numOfKnights = 0;
+            int numOfRooks = 0;
+            int numOfKings = 0;
+            int numOfQueens = 0;
+            for (int i = 0; i < 64; i++)
+            {
+                if (i % 8 == 0) Console.WriteLine();
+                ChessPieceType pieceType = board.Squares[i].Piece == null ? ChessPieceType.None : board.Squares[i].Piece.PieceType;
+                Console.Write(pieceType.ToString() + " ");
+                switch (pieceType)
+                {
+                    case ChessPieceType.None:
+                        numOfEmpty++;
+                        break;
+                    case ChessPieceType.Pawn:
+                        numOfPawns++;
+                        break;
+                    case ChessPieceType.Bishop:
+                        numOfBishops++;
+                        break;
+                    case ChessPieceType.Knight:
+                        numOfKnights++;
+                        break;
+                    case ChessPieceType.Rook:
+                        numOfRooks++;
+                        break;
+                    case ChessPieceType.King:
+                        numOfKings++;
+                        break;
+                    case ChessPieceType.Queen:
+                        numOfQueens++;
+                        break;
+                    default:
+                        Assert.Fail("unrecognized piece type");
+                        break;
+                }
+            }
+            Assert.AreEqual(numOfEmpty, 32);
+            Assert.AreEqual(numOfPawns, 16);
+            Assert.AreEqual(numOfBishops, 4);
+            Assert.AreEqual(numOfKnights, 4);
+            Assert.AreEqual(numOfRooks, 4);
+            Assert.AreEqual(numOfKings, 2);
+            Assert.AreEqual(numOfQueens, 2);
+
+
+            // next check that the pieces follow our rules
+            int bishop1Index = -1;
+            int bishop2Index = -1;
+            int knight1Index = -1;
+            int knight2Index = -1;
+            int rook1Index = -1;
+            int rook2Index = -1;
+            int kingIndex = -1;
+            int queenIndex = -1;
+
+            for (int i = 0; i < 8; i++)
+            {
+                ChessPieceType pieceType = board.Squares[i].Piece == null ? ChessPieceType.None : board.Squares[i].Piece.PieceType;
+                switch (pieceType)
+                {
+                    case ChessPieceType.Bishop:
+                        if (bishop1Index == -1)
+                        {
+                            bishop1Index = i;
+                        }
+                        else
+                        {
+                            bishop2Index = i;
+                        }
+                        break;
+                    case ChessPieceType.Knight:
+                        if (knight1Index == -1)
+                        {
+                            knight1Index = i;
+                        }
+                        else
+                        {
+                            knight2Index = i;
+                        }
+                        break;
+                    case ChessPieceType.Rook:
+                        if (rook1Index == -1)
+                        {
+                            rook1Index = i;
+                        }
+                        else
+                        {
+                            rook2Index = i;
+                        }
+                        break;
+                    case ChessPieceType.King:
+                        kingIndex = i;
+                        break;
+                    case ChessPieceType.Queen:
+                        queenIndex = i;
+                        break;
+                    default:
+                        Assert.Fail("piece " + board.Squares[i].Piece.PieceType.ToString() + " is not permited in 1st rank");
+                        break;
+                }
+
+            }
+            // Check that the pieces are in the first rank
+            Assert.IsFalse(bishop1Index == -1);
+            Assert.IsFalse(bishop2Index == -1);
+            Assert.IsFalse(knight1Index == -1);
+            Assert.IsFalse(knight2Index == -1);
+            Assert.IsFalse(rook1Index == -1);
+            Assert.IsFalse(rook2Index == -1);
+            Assert.IsFalse(kingIndex == -1);
+            Assert.IsFalse(queenIndex == -1);
+
+            // check that bishops are on different colored squares
+            Assert.IsFalse((bishop1Index + bishop2Index) % 2 == 0);
+
+            // check that the king is between 2 rooks
+            Assert.IsTrue((rook1Index > kingIndex && kingIndex > rook2Index) || (rook1Index < kingIndex && kingIndex < rook2Index));
+
+            // check that there are 8 pawns in the second rank
+            int firstRankPawns = 0;
+            for (int i = 8; i < 16; i++)
+            {
+                ChessPieceType pieceType = board.Squares[i].Piece == null ? ChessPieceType.None : board.Squares[i].Piece.PieceType;
+                switch (pieceType)
+                {
+                    case ChessPieceType.Pawn:
+                        firstRankPawns++;
+                        break;
+                    default:
+                        Assert.Fail("piece " + board.Squares[i].Piece.PieceType.ToString() + " is not permited in 2nd rank");
+                        break;
+                }
+            }
+
+            Assert.IsTrue(firstRankPawns == 8);
+
+            // check that the first half of the board mirrors the second half & are different colors
+            // offset to allow for easier mirroring
+            int offset = 72;
+            for (int i = 0; i < 32; i++)
+            {
+                // first calculate offset
+                if (i % 8 == 0) offset -= 16;
+                // get our first piece type, if the piece is null, set the type to none
+                ChessPieceType pieceType = board.Squares[i].Piece == null ? ChessPieceType.None : board.Squares[i].Piece.PieceType;
+                // get the mirror piece type, if the mirror piece is null, set the type to none
+                ChessPieceType mirrorPieceType = board.Squares[offset + i].Piece == null ? ChessPieceType.None : board.Squares[offset + i].Piece.PieceType;
+                // make sure the piecetype and the mirrorpiecetype are the same
+                Assert.IsTrue(pieceType == mirrorPieceType);
+                // if the piecetype isn't none, then we can check that the colors too
+                if (pieceType != ChessPieceType.None)
+                {
+                    // make sure the piece colors are different
+                    Assert.IsFalse(board.Squares[i].Piece.PieceColor == board.Squares[offset + i].Piece.PieceColor);
+                }
+            }
+        }
+    }
+
     public class PerformanceTest
     {
         private static ResultBoards resultBoards = new ResultBoards { Positions = new List<Board>(30) };
@@ -485,7 +677,7 @@ namespace ChessEngine.Engine
                     //We Generate Valid Moves for Board
                     PieceValidMoves.GenerateValidMoves(board);
 
-                    
+
                     if (board.BlackCheck && movingSide == ChessPieceColor.Black)
                     {
                         continue;
@@ -494,7 +686,7 @@ namespace ChessEngine.Engine
                     if (board.WhiteCheck && movingSide == ChessPieceColor.White)
                     {
                         continue;
-                    } 
+                    }
 
                     //We calculate the board score
                     Evaluation.EvaluateBoardScore(board);
@@ -508,6 +700,8 @@ namespace ChessEngine.Engine
 
             return resultBoards;
         }
+
+        
 
         #region Nested type: PerformanceResult
 

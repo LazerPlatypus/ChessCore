@@ -1,3 +1,4 @@
+using ChessCoreEngine;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -194,6 +195,12 @@ namespace ChessEngine.Engine
         {
             InitiateEngine();
             InitiateBoard("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        }
+
+        public void New960Game()
+        {
+            InitiateEngine();
+            InitiateBoard(VarientBoardGenerator.Chess960() + " w KQkq - 0 1");
         }
 
         public void InitiateBoard(string fen)
